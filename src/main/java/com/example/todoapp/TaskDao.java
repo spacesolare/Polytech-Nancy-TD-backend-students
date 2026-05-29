@@ -1,8 +1,6 @@
 package com.example.todoapp;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Data Access Object for {@link Task} model.
@@ -22,11 +20,30 @@ public class TaskDao {
      * @param task task to save.
      * @return task model.
      */
+
     public Task save(Task task) {
         storage.put(task.id(), task);
         return task;
     }
+    public List<Task> findAll(){return new ArrayList<>(storage.values());}
 
+    public int remove(int id) {
+        if (storage.containsKey(id)) {
+            storage.remove(id);
+            return 1;
+        }
+        else {
+            return 0;
+        }
+    }
+    public Optional<Task> modify(int id, Task task) {
+        if (!storage.containsKey(id)) {
+            return Optional.empty();
+        }
+        storage.replace(id,storage.get(id),task);
+
+        return Optional.ofNullable(storage.get(id));
+    }
     /**
      * Retrieve {@link Task} model by id.
      * @param id identifier of the {@link Task}.
