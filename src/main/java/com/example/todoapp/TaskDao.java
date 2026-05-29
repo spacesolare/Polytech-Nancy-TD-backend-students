@@ -28,6 +28,8 @@ public class TaskDao {
      * @return task model.
      */
     public Task save(Task task) {
+        validateTask(task);
+
         if (task.id() == null) {
             return insertTask(task);
         }
@@ -71,6 +73,8 @@ public class TaskDao {
     }
 
     public int remove(int id) {
+        validateId(id);
+
         String sql = "DELETE FROM task WHERE id = ?";
 
         try (Connection connection = getConnection();
@@ -83,6 +87,9 @@ public class TaskDao {
     }
 
     public Optional<Task> modify(int id, Task task) {
+        validateId(id);
+        validateTask(task);
+
         String sql = "UPDATE task SET title = ?, description = ?, done = ? WHERE id = ?";
 
         try (Connection connection = getConnection();
@@ -109,6 +116,8 @@ public class TaskDao {
      * @return {@link Task} model wrapped by Optional.
      */
     public Optional<Task> findById(int id) {
+        validateId(id);
+
         String sql = "SELECT id, title, description, done FROM task WHERE id = ?";
 
         try (Connection connection = getConnection();
@@ -194,6 +203,24 @@ public class TaskDao {
         statement.setString(3, task.description());
         statement.setBoolean(4, task.done());
         statement.addBatch();
+    }
+
+    private void validateTask(Task task) {
+        if (task == null) {
+            throw new IllegalArgumentException("Task is required");
+        }
+        if (task.id() != null) {
+            validateId(task.id());
+        }
+        if (task.title() == null || task.title().isBlank()) {
+            throw new IllegalArgumentException("Task title is required");
+        }
+    }
+
+    private void validateId(int id) {
+        if (id < 1) {
+            throw new IllegalArgumentException("Task id must be greater than 0");
+        }
     }
 
     private Connection getConnection() throws SQLException {
